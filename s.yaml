@@ -1,0 +1,36 @@
+edition: 1.0.0 #  命令行YAML规范版本，遵循语义化版本（Semantic Versioning）规范
+name: dingtalk-weather-nyqt
+access: default
+
+services:
+  cron-weather: #  服务名称
+    component: fc # 组件名称
+    props: #  组件的属性值
+      region: cn-hangzhou
+      service:
+        name: ServerlessWeatherDingTalk
+        description: 钉钉天气播报服务
+      function:
+        name: weather-forecast
+        description: 推送天气信息到钉群
+        codeUri: ./
+        handler: index.handler
+        memorySize: 128
+        runtime: python3
+        timeout: 10
+        environmentVariables:
+          webhook: https://oapi.dingtalk.com/robot/send?access_token=2dae433d8fe5350a234c9e3bd990843dcf0879ed788c7d99740ed73d30c1fd6c
+          city: 101210101
+      triggers:
+        - name: cron-tab-trigger
+          type: timer
+          config:
+            payload: ''
+            cronExpression: 'CRON_TZ=Asia/Shanghai 0 0 8 * * *'
+            enable: true
+        - name: http-trigger
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
